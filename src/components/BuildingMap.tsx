@@ -24,6 +24,7 @@ export const BuildingMap: React.FC<BuildingMapProps> = ({
   onHoverApartment,
 }) => {
   const [tooltipPos, setTooltipPos] = useState({ x: 0, y: 0 });
+  const [rotations, setRotations] = useState<Record<string, number>>({});
   const containerRef = useRef<HTMLDivElement>(null);
 
   const handleMouseMove = (e: React.MouseEvent) => {
@@ -89,6 +90,7 @@ export const BuildingMap: React.FC<BuildingMapProps> = ({
           {floor.apartments.map((apt) => {
             const isSelected = selectedApartment?.id === apt.id;
             const isHovered = hoveredApartment?.id === apt.id;
+            const rotation = rotations[apt.id] || 0;
 
             let fillClass = 'fill-white';
             let strokeClass = 'stroke-slate-300';
@@ -106,13 +108,26 @@ export const BuildingMap: React.FC<BuildingMapProps> = ({
               cursorClass = 'cursor-not-allowed';
             }
 
+            const handleApartmentClick = () => {
+              if (apt.status === 'sold') return;
+              if (isSelected && is3D) {
+                setRotations(prev => ({ ...prev, [apt.id]: (prev[apt.id] || 0) + 90 }));
+              } else {
+                onSelectApartment(apt, floor);
+              }
+            };
+
             return (
               <g
                 key={apt.id}
-                onClick={() => apt.status !== 'sold' && onSelectApartment(apt, floor)}
+                onClick={handleApartmentClick}
                 onMouseEnter={() => apt.status !== 'sold' && onHoverApartment(apt)}
                 onMouseLeave={() => onHoverApartment(null)}
                 className={cn('transition-all duration-300 pointer-events-auto', cursorClass)}
+                style={{
+                  transformOrigin: `${apt.center.x}px ${apt.center.y}px`,
+                  transform: `rotate(${rotation}deg)`,
+                }}
               >
                 <path
                   d={apt.path}
@@ -192,7 +207,7 @@ export const BuildingMap: React.FC<BuildingMapProps> = ({
               <span>Area:</span> <span className="font-medium text-right">{hoveredApartment.area} m²</span>
               <span>Price:</span> <span className="font-medium text-right">${hoveredApartment.price.toLocaleString()}</span>
             </div>
-            <div className="mt-2 pt-2 border-t border-slate-200">
+            <div className="mt-2 pt-2 border-t border-slate-200 flex justify-between items-center">
               <span className={cn(
                 "inline-flex items-center px-2 py-0.5 rounded text-xs font-medium capitalize",
                 hoveredApartment.status === 'available' && "bg-emerald-100 text-emerald-800",
@@ -201,6 +216,9 @@ export const BuildingMap: React.FC<BuildingMapProps> = ({
               )}>
                 {hoveredApartment.status}
               </span>
+              {is3D && selectedApartment?.id === hoveredApartment.id && (
+                <span className="text-xs text-slate-400 italic">Click to rotate</span>
+              )}
             </div>
           </motion.div>
         )}

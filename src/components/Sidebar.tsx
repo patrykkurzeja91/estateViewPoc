@@ -14,6 +14,7 @@ interface SidebarProps {
   onSelectFloor: (floor: Floor) => void;
   selectedApartment: Apartment | null;
   onClearSelection: () => void;
+  onContactSales: () => void;
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({
@@ -26,6 +27,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   onSelectFloor,
   selectedApartment,
   onClearSelection,
+  onContactSales,
 }) => {
   return (
     <div className="w-80 bg-white border-r border-slate-200 h-full flex flex-col shadow-lg z-20 relative">
@@ -165,6 +167,19 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 </div>
               </div>
 
+              {/* Floor Plan Image */}
+              <div className="mb-6 rounded-lg overflow-hidden border border-slate-200 bg-white shadow-sm">
+                <div className="bg-slate-50 px-3 py-2 border-b border-slate-100 text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                  Floor Plan
+                </div>
+                <img 
+                  src={selectedApartment.floorPlanImage} 
+                  alt={`Floor plan for Apt ${selectedApartment.number}`} 
+                  className="w-full h-40 object-cover"
+                  referrerPolicy="no-referrer"
+                />
+              </div>
+
               <div className="grid grid-cols-2 gap-4 mb-6">
                 <div className="bg-white p-3 rounded-lg border border-slate-100 shadow-sm">
                   <div className="flex items-center gap-2 text-slate-500 mb-1">
@@ -200,6 +215,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
               <div className="flex gap-2">
                 <button 
+                  onClick={selectedApartment.status === 'available' ? onContactSales : undefined}
                   className={cn(
                     "flex-1 py-3 px-4 rounded-lg font-semibold transition-all shadow-sm text-sm",
                     selectedApartment.status === 'available' 
